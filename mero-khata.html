@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#92400e">
+<title>मेरो खाता</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:#faf7f2;color:#1c1a17;
+    max-width:430px;margin:0 auto;
+    position:relative;height:100dvh;
+    display:flex;flex-direction:column;
+  }
+  ::-webkit-scrollbar{width:3px}
+  ::-webkit-scrollbar-thumb{background:#d97706;border-radius:2px}
+  button,input,select,textarea{font-family:inherit;font-size:14px;}
+  select option{background:#fffbf5;}
+  input[type=number]::-webkit-inner-spin-button{opacity:.4}
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes calPop{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes toastPop{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  .anim{animation:slideUp .22s ease both}
+
+  /* ── HEADER ── */
+  #header{
+    background:linear-gradient(135deg,#92400e,#b45309,#d97706);
+    padding:18px 16px 13px;
+    box-shadow:0 4px 18px rgba(146,64,14,.3);
+    flex-shrink:0;
+  }
+  #header .top{display:flex;justify-content:space-between;align-items:flex-start;}
+  #header .label{font-size:10px;color:#fde68a;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
+  #header .title{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-top:1px;}
+  #header .today{font-size:11px;color:#fcd34d;margin-top:2px;font-weight:600;}
+  #header .baki-label{font-size:9px;color:#fde68a;font-weight:700;letter-spacing:.5px;text-align:right;}
+  #header .baki-val{font-size:22px;font-weight:900;letter-spacing:-.5px;text-align:right;}
+  .pills{display:flex;gap:7px;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+  .pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:4px 11px;white-space:nowrap;}
+  .pill .pl{font-size:9px;color:#fde68a;font-weight:700;}
+  .pill .pv{font-size:12px;font-weight:800;}
+
+  /* ── TABS ── */
+  #tabs{
+    display:flex;background:#fff;
+    border-bottom:2px solid #fef3c7;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+    flex-shrink:0;
+  }
+  .tab-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:8px 0;cursor:pointer;
+    border-bottom:3px solid transparent;transition:all .15s;
+    background:none;border-left:none;border-right:none;border-top:none;
+  }
+  .tab-btn.active{border-bottom:3px solid #d97706;}
+  .tab-btn .ti{font-size:17px;}
+  .tab-btn .tl{font-size:9px;font-weight:700;color:#9ca3af;margin-top:1px;letter-spacing:.4px;text-transform:uppercase;}
+  .tab-btn.active .tl{color:#d97706;}
+
+  /* ── CONTENT ── */
+  #content{flex:1;overflow-y:auto;padding:13px 13px 90px;}
+
+  /* ── CARDS ── */
+  .card{background:#fff;border:1px solid #fde68a;border-radius:14px;padding:14px;margin-bottom:10px;}
+  .card:hover{background:#fef9ec;}
+  .stat-row{display:flex;background:#fff;border-radius:11px;padding:11px;margin-bottom:11px;border:1px solid #fde68a;}
+  .stat-cell{flex:1;text-align:center;}
+  .stat-cell:not(:last-child){border-right:1px solid #fde68a;}
+  .stat-cell .sl{font-size:8px;color:#9ca3af;font-weight:700;}
+  .stat-cell .sv{font-size:13px;font-weight:900;margin-top:1px;}
+
+  /* ── GRID CARDS ── */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+  .gcard{border-radius:13px;padding:11px 13px;}
+  .gcard .gi{font-size:18px;margin-bottom:3px;}
+  .gcard .gl{font-size:9px;color:#6b7280;font-weight:700;text-transform:uppercase;}
+  .gcard .gv{font-size:16px;font-weight:900;margin-top:2px;}
+  .gcard .gs{font-size:9px;color:#9ca3af;margin-top:1px;}
+
+  /* ── BIG BAKI CARD ── */
+  .big-baki{background:linear-gradient(135deg,#92400e,#d97706);border-radius:14px;padding:18px;margin-bottom:11px;color:#fff;}
+  .big-baki .bb-l{font-size:9px;color:#fde68a;font-weight:700;letter-spacing:1px;}
+  .big-baki .bb-v{font-size:34px;font-weight:900;letter-spacing:-.5px;margin-top:3px;}
+  .big-baki .bb-s{font-size:11px;color:#fcd34d;margin-top:3px;}
+
+  /* ── PATRO ── */
+  .patro-header{background:linear-gradient(135deg,#7c2d12,#c2410c,#ea580c);border-radius:14px;padding:13px 15px;margin-bottom:12px;color:#fff;}
+  .month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .nav-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:18px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .month-title{font-size:20px;font-weight:900;text-align:center;}
+  .month-sub{font-size:10px;color:#fed7aa;text-align:center;margin-top:1px;}
+  .day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px;}
+  .dh{text-align:center;font-size:9px;font-weight:700;padding:3px 0;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:10px;}
+  .cal-day{background:#fff;border:1px solid #fef3c7;border-radius:9px;padding:3px 1px 5px;text-align:center;min-height:40px;cursor:pointer;transition:all .12s;position:relative;}
+  .cal-day:hover{background:#fef3c7;}
+  .cal-day.today{background:#fff7ed;border:2px solid #f59e0b;}
+  .cal-day.selected{background:#d97706;border:2px solid #d97706;}
+  .cal-day.empty{opacity:0;pointer-events:none;}
+  .cal-day .cn{font-size:12px;font-weight:400;line-height:1.2;}
+  .cal-day.today .cn{color:#d97706;font-weight:800;}
+  .cal-day.selected .cn{color:#fff;font-weight:800;}
+  .cal-day .ca{font-size:7px;color:#bbb;}
+  .cal-day.today .ca{color:#d97706;}
+  .cal-day.selected .ca{color:rgba(255,255,255,.6);}
+  .cal-day.sat .cn{color:#dc2626;}
+  .cal-day.sun .cn{color:#b45309;}
+  .dots{display:flex;justify-content:center;gap:2px;margin-top:1px;}
+  .dot{width:4px;height:4px;border-radius:50%;}
+  .cal-day.selected .dot{background:#fff!important;}
+  .legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+  .legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#6b7280;}
+  .legend-dot{width:7px;height:7px;border-radius:50%;}
+  .sel-day-panel{background:#fff;border:2px solid #fde68a;border-radius:12px;padding:13px;margin-bottom:10px;animation:slideUp .2s ease;}
+  .event-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:5px;}
+  .event-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .month-events{margin-top:2px;}
+  .month-ev-item{display:flex;align-items:center;gap:10px;padding:7px 11px;background:#fff;border-radius:8px;margin-bottom:5px;}
+  .mei-day{min-width:24px;text-align:center;}
+  .mei-d{font-size:13px;font-weight:800;}
+  .mei-w{font-size:8px;color:#9ca3af;}
+
+  /* ── BS DATE PICKER ── */
+  .bsdp{margin-bottom:14px;position:relative;}
+  .bsdp label{font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:5px;}
+  .bsdp-trigger{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 13px;border:1.5px solid #fde68a;border-radius:10px;
+    background:#fff;cursor:pointer;transition:all .15s;
+  }
+  .bsdp-trigger.open{border-color:#d97706;background:#fffbf0;box-shadow:0 0 0 3px rgba(217,119,6,.2);}
+  .bsdp-trigger .dt-icon{font-size:16px;margin-right:8px;}
+  .bsdp-trigger .dt-main{font-size:14px;font-weight:700;color:#1c1a17;}
+  .bsdp-trigger .dt-main.empty{font-weight:400;color:#9ca3af;}
+  .bsdp-trigger .dt-sub{font-size:10px;color:#9ca3af;margin-top:1px;}
+  .bsdp-trigger .dt-arrow{font-size:11px;font-weight:700;}
+  .bsdp-trigger .dt-clear{font-size:16px;color:#9ca3af;padding:0 2px;background:none;border:none;cursor:pointer;line-height:1;}
+  .bsdp-cal{
+    position:absolute;top:100%;left:0;right:0;margin-top:4px;
+    background:#fffbf5;border:2px solid var(--accent,#d97706);
+    border-radius:14px;padding:12px;z-index:9999;
+    box-shadow:0 8px 32px rgba(0,0,0,.18);
+    animation:calPop .15s ease;
+  }
+  .bsdp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+  .bsdp-nav-btn{background:rgba(217,119,6,.15);border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .bsdp-nav select{background:none;border:none;font-size:13px;font-weight:800;cursor:pointer;outline:none;color:#1c1a17;}
+  .bsdp-today-btn{display:block;margin:0 auto 7px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3);border-radius:20px;padding:3px 14px;font-size:10px;font-weight:700;cursor:pointer;}
+  .bsdp-dh{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px;}
+  .bsdp-dhc{text-align:center;font-size:9px;font-weight:700;padding:2px 0;}
+  .bsdp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .bsdp-cell{text-align:center;padding:5px 0;border-radius:7px;font-size:12px;cursor:pointer;border:1.5px solid transparent;transition:background .1s;}
+  .bsdp-cell:hover{background:#fef3c7;}
+  .bsdp-cell.sel{color:#fff;font-weight:800;}
+  .bsdp-cell.tod{font-weight:800;}
+  .bsdp-cell.empty{opacity:0;pointer-events:none;}
+  .bsdp-cell.sat{color:#dc2626;}
+  .bsdp-cell.sun{color:#b45309;}
+
+  /* ── RENT / PASAL CARDS ── */
+  .rec-card{background:#fff;border:1px solid #fde68a;border-radius:14px;padding:13px;margin-bottom:10px;transition:background .18s;}
+  .rec-card:hover{background:#fef9ec;}
+  .rec-main{display:flex;justify-content:space-between;align-items:flex-start;}
+  .rec-left{flex:1;}
+  .rec-right{text-align:right;margin-left:9px;}
+  .rec-title{font-weight:800;font-size:14px;}
+  .rec-bs{font-size:10px;color:#d97706;font-weight:700;}
+  .rec-ad{font-size:10px;color:#9ca3af;}
+  .rec-note{font-size:10px;color:#6b7280;margin-top:5px;background:#fef9ec;border-radius:6px;padding:3px 8px;}
+  .rec-amount{font-size:17px;font-weight:900;}
+  .rec-paid-label{font-size:10px;color:#16a34a;font-weight:700;}
+  .rec-paid-ad{font-size:9px;color:#9ca3af;}
+  .prog-wrap{background:#f3f4f6;border-radius:5px;height:5px;margin:7px 0;overflow:hidden;}
+  .prog-bar{height:100%;border-radius:5px;transition:width .4s;}
+  .rec-footer{display:flex;justify-content:space-between;align-items:center;}
+  .saman-box{font-size:11px;color:#4b5563;margin-top:5px;background:#f9fafb;border-radius:6px;padding:4px 8px;line-height:1.5;}
+
+  /* ── BUTTONS ── */
+  .btn-primary{width:100%;background:linear-gradient(135deg,#92400e,#d97706);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;}
+  .btn-green{width:100%;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;}
+  .btn-add{background:#d97706;color:#fff;border:none;border-radius:10px;padding:7px 13px;font-weight:700;font-size:13px;cursor:pointer;}
+  .btn-pay{background:#d97706;color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;}
+  .btn-del{background:none;border:1px solid #ef4444;color:#ef4444;border-radius:7px;padding:4px 8px;font-size:11px;cursor:pointer;}
+  .btn-tira{background:#16a34a;color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;}
+  .btn-out{background:#dc2626;color:#fff;border:none;border-radius:7px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;}
+  .btn-small{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 0;font-size:12px;font-weight:700;cursor:pointer;color:#92400e;}
+  .badge-paid{background:#dcfce7;color:#16a34a;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;}
+  .badge-warn{background:#fef3c7;color:#92400e;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;}
+
+  /* ── FAB ── */
+  #fab{position:fixed;bottom:20px;right:16px;display:flex;flex-direction:column;gap:9px;z-index:30;}
+  .fab-btn{width:48px;height:48px;border-radius:24px;color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .18s;box-shadow:0 6px 18px rgba(0,0,0,.25);}
+  .fab-btn:hover{transform:scale(1.1);}
+
+  /* ── MODAL ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .18s ease;}
+  .modal-box{background:#fffbf5;border-radius:22px 22px 0 0;padding:20px 17px 50px;width:100%;max-width:430px;animation:slideUp .22s ease;max-height:92vh;overflow-y:auto;}
+  .modal-header{font-weight:800;font-size:17px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-close{background:none;border:none;color:#9ca3af;font-size:22px;cursor:pointer;line-height:1;}
+  .form-field{margin-bottom:13px;}
+  .form-field label{font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:4px;}
+  .form-input{width:100%;padding:11px 13px;border:1.5px solid #fde68a;border-radius:10px;font-size:14px;background:#fff;outline:none;color:#1c1a17;}
+  .form-input:focus{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.15);}
+  .cb-label{font-size:12px;font-weight:700;color:#6b7280;display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .pay-info{background:#fef9ec;border-radius:10px;padding:11px;margin-bottom:14px;border:1px solid #fde68a;}
+  .pay-btns{display:flex;gap:7px;margin-bottom:14px;}
+
+  /* ── DELETE CONFIRM ── */
+  .del-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:0 16px;animation:fadeIn .14s ease;}
+  .del-box{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:300px;text-align:center;animation:slideUp .18s ease;}
+  .del-btns{display:flex;gap:9px;}
+  .btn-cancel{flex:1;background:#f3f4f6;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px;}
+  .btn-delete{flex:1;background:#dc2626;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;font-size:13px;}
+
+  /* ── TOAST ── */
+  #toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.2);display:none;animation:toastPop .2s ease;}
+
+  /* ── CONVERTER ── */
+  .converter{margin-top:14px;background:#fff;border:1px solid #fde68a;border-radius:13px;padding:14px;}
+  .conv-toggle{display:flex;gap:7px;margin-bottom:12px;}
+  .conv-btn{flex:1;border:1px solid #fde68a;border-radius:8px;padding:7px 0;font-size:12px;font-weight:700;cursor:pointer;}
+  .conv-result{padding:9px 13px;border-radius:9px;font-size:13px;font-weight:700;text-align:center;margin-top:9px;}
+
+  /* ── SECTION HEADERS ── */
+  .sec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
+  .sec-title{font-weight:800;font-size:15px;}
+  .sec-sub{font-size:11px;color:#6b7280;}
+  .empty-state{text-align:center;padding:36px 0;color:#9ca3af;}
+
+  /* overdue section */
+  .overdue-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:13px;padding:13px;margin-bottom:10px;}
+  .overdue-title{font-weight:700;color:#c2410c;margin-bottom:7px;}
+  .overdue-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #fed7aa;}
+  .baki-box{background:#fffbeb;border:1px solid #fde68a;border-radius:13px;padding:13px;}
+  .baki-title{font-weight:700;color:#92400e;margin-bottom:7px;}
+  .baki-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #fde68a;}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="top">
+    <div>
+      <div class="label">मेरो खाता</div>
+      <div class="title">Personal Khata</div>
+      <div class="today" id="hdr-today"></div>
+    </div>
+    <div>
+      <div class="baki-label">JAMMA BAKI</div>
+      <div class="baki-val" id="hdr-baki"></div>
+    </div>
+  </div>
+  <div class="pills">
+    <div class="pill"><div class="pl">Rent Baki</div><div class="pv" id="pill-rent"></div></div>
+    <div class="pill"><div class="pl">Pasal Baki</div><div class="pv" id="pill-pasal"></div></div>
+    <div class="pill"><div class="pl">Overdue</div><div class="pv" id="pill-overdue"></div></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <button class="tab-btn active" onclick="switchTab('patro')" id="tb-patro"><span class="ti">📅</span><span class="tl">Patro</span></button>
+  <button class="tab-btn" onclick="switchTab('summary')" id="tb-summary"><span class="ti">📊</span><span class="tl">Summary</span></button>
+  <button class="tab-btn" onclick="switchTab('rent')" id="tb-rent"><span class="ti">🏠</span><span class="tl">Rent</span></button>
+  <button class="tab-btn" onclick="switchTab('pasal')" id="tb-pasal"><span class="ti">🛒</span><span class="tl">Pasal</span></button>
+</div>
+
+<!-- CONTENT -->
+<div id="content"></div>
+
+<!-- FAB -->
+<div id="fab">
+  <button class="fab-btn" style="background:#d97706" onclick="openModal('pasal')">🛒</button>
+  <button class="fab-btn" style="background:#92400e" onclick="openModal('rent')">🏠</button>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div id="del-overlay" class="del-overlay" style="display:none" onclick="if(event.target===this)closeDel()">
+  <div class="del-box">
+    <div style="font-size:34px;margin-bottom:5px">🗑️</div>
+    <div style="font-weight:800;font-size:15px;margin-bottom:4px">Delete garne?</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:18px">Yo record permanently delete huncha.</div>
+    <div class="del-btns">
+      <button class="btn-cancel" onclick="closeDel()">Cancel</button>
+      <button class="btn-delete" id="del-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  BS ENGINE
+// ═══════════════════════════════════════════════════════
+const BS_DATA = [
+  [2000,30,32,31,32,31,30,30,30,29,30,29,31],[2001,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2002,31,31,32,32,31,30,30,29,30,29,30,30],[2003,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2004,30,32,31,32,31,30,30,30,29,30,29,31],[2005,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2006,31,31,32,32,31,30,30,29,30,29,30,30],[2007,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2008,31,31,31,32,31,31,29,30,30,29,29,31],[2009,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2010,31,31,32,32,31,30,30,29,30,29,30,30],[2011,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2012,31,31,31,32,31,31,29,30,30,29,30,30],[2013,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2014,31,31,32,32,31,30,30,29,30,29,30,30],[2015,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2016,31,31,31,32,31,31,29,30,30,29,30,30],[2017,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2018,31,31,32,32,31,30,30,29,30,29,30,30],[2019,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2020,31,31,31,32,31,31,29,30,30,29,30,30],[2021,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2022,31,31,32,32,31,30,30,29,30,29,30,30],[2023,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2024,31,31,31,32,31,31,29,30,30,29,30,30],[2025,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2026,31,31,32,32,31,30,30,29,30,29,30,30],[2027,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2028,31,31,31,32,31,31,29,30,30,29,30,30],[2029,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2030,31,31,32,32,31,30,30,29,30,29,30,30],[2031,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2032,31,31,31,32,31,31,29,30,30,29,30,30],[2033,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2034,31,31,32,32,31,30,30,29,30,29,30,30],[2035,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2036,31,31,31,32,31,31,30,29,30,29,30,30],[2037,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2038,31,31,32,32,31,30,30,29,30,29,30,30],[2039,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2040,31,31,31,32,31,31,30,29,30,29,30,30],[2041,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2042,31,31,32,32,31,30,30,29,30,29,30,30],[2043,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2044,31,31,31,32,31,31,30,29,30,29,30,30],[2045,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2046,31,31,32,32,31,30,30,29,30,29,30,30],[2047,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2048,31,31,31,32,31,31,30,29,30,29,30,30],[2049,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2050,31,31,32,32,31,30,30,29,30,29,30,30],[2051,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2052,31,31,31,32,31,31,30,29,30,29,30,30],[2053,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2054,31,31,32,32,31,30,30,29,30,29,30,30],[2055,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2056,31,31,31,32,31,31,30,29,30,29,30,30],[2057,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2058,31,31,32,32,31,30,30,29,30,29,30,30],[2059,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2060,31,31,31,32,31,31,30,29,30,29,30,30],[2061,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2062,31,31,32,32,31,30,30,29,30,29,30,30],[2063,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2064,31,31,31,32,31,31,30,29,30,29,30,30],[2065,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2066,31,31,32,32,31,30,30,29,30,29,30,30],[2067,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2068,31,31,31,32,31,31,30,29,30,29,30,30],[2069,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2070,31,31,32,32,31,30,30,29,30,29,30,30],[2071,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2072,31,31,31,32,31,31,30,29,30,29,30,30],[2073,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2074,31,31,32,32,31,30,30,29,30,29,30,30],[2075,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2076,31,31,31,32,31,31,30,29,30,29,30,30],[2077,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2078,31,31,32,32,31,30,30,29,30,29,30,30],[2079,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2080,31,31,31,32,31,31,30,29,30,29,30,30],[2081,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2082,31,31,32,32,31,30,30,29,30,29,30,30],[2083,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2084,31,31,31,32,31,31,30,29,30,29,30,30],[2085,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2086,31,31,32,32,31,30,30,29,30,29,30,30],[2087,31,32,31,32,31,30,30,30,29,29,30,31],
+  [2088,31,32,31,32,31,30,30,30,29,29,30,31],[2089,31,31,32,31,31,31,30,29,30,29,30,30],
+  [2090,31,31,32,32,31,30,30,29,30,29,30,30],
+];
+const BS_M_NP = ["बैशाख","जेठ","असार","साउन","भदौ","असोज","कार्तिक","मंसिर","पुष","माघ","फागुन","चैत्र"];
+const BS_M_EN = ["Baisakh","Jestha","Ashadh","Shrawan","Bhadra","Ashwin","Kartik","Mangsir","Poush","Magh","Falgun","Chaitra"];
+const BS_W    = ["आ","सो","मं","बु","बि","शु","श"];
+const NP_D    = ["०","१","२","३","४","५","६","७","८","९"];
+const nep     = n => String(n).split("").map(c=>NP_D[+c]??c).join("");
+const bsDays  = (y,m) => { const r=BS_DATA.find(r=>r[0]===y); return r?r[m]:30; };
+
+function adToBS(d){
+  const dt=new Date(d);
+  const base=new Date(1943,3,14);
+  let days=Math.floor((dt-base)/86400000);
+  if(days<0)return null;
+  let y=2000,m=1,day=1;
+  outer:for(let yi=2000;yi<2091;yi++){
+    const r=BS_DATA.find(r=>r[0]===yi);
+    if(!r)break;
+    for(let mi=1;mi<=12;mi++){
+      if(days<r[mi]){y=yi;m=mi;day=days+1;break outer;}
+      days-=r[mi];
+    }
+  }
+  return{y,m,d:day};
+}
+function bsToAD(y,m,d){
+  let days=0;
+  for(let yi=2000;yi<y;yi++){const r=BS_DATA.find(r=>r[0]===yi);if(r)for(let mi=1;mi<=12;mi++)days+=r[mi];}
+  const r=BS_DATA.find(r=>r[0]===y);
+  if(r)for(let mi=1;mi<m;mi++)days+=r[mi];
+  days+=d-1;
+  return new Date(new Date(1943,3,14).getTime()+days*86400000);
+}
+function bsToADStr(y,m,d){return bsToAD(y,m,d).toISOString().split("T")[0];}
+function todayBS(){return adToBS(new Date());}
+function fmtBS(adStr){
+  if(!adStr)return"—";
+  const bs=adToBS(new Date(adStr));
+  return bs?`${nep(bs.d)} ${BS_M_NP[bs.m-1]} ${nep(bs.y)}`:"—";
+}
+function fmtAD(adStr){
+  if(!adStr)return"—";
+  const dt=new Date(adStr);
+  const ms=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return`${dt.getDate()} ${ms[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+const fmtNPR=n=>`Rs ${Number(n).toLocaleString()}`;
+const todayStr=()=>new Date().toISOString().split("T")[0];
+
+// ═══════════════════════════════════════════════════════
+//  DATA STORAGE
+// ═══════════════════════════════════════════════════════
+let rents  = JSON.parse(localStorage.getItem("mk_rents")||"null") || [
+  {id:1,month:"Chaitra 2081",amount:7000,dueDate:"2025-03-14",paidDate:"2025-03-10",paid:true, note:"Timai tireko"},
+  {id:2,month:"Baisakh 2082",amount:7000,dueDate:"2025-04-14",paidDate:"",          paid:false,note:""},
+];
+let pasals = JSON.parse(localStorage.getItem("mk_pasals")||"null") || [
+  {id:1,pasal:"Sharma Pasal",items:"Chamal 10kg, Daal 2kg, Tel",total:1850,paid:1000,date:"2026-03-10",note:""},
+  {id:2,pasal:"Thapa Store", items:"Sabun, Shampoo, Brush",     total:450, paid:450, date:"2026-03-15",note:"Poora tireko"},
+  {id:3,pasal:"Raju Tarkari",items:"Tarkari weekly",            total:1200,paid:600, date:"2026-03-18",note:"Aadha matra"},
+];
+function saveData(){
+  localStorage.setItem("mk_rents",JSON.stringify(rents));
+  localStorage.setItem("mk_pasals",JSON.stringify(pasals));
+}
+
+// ═══════════════════════════════════════════════════════
+//  COMPUTED
+// ═══════════════════════════════════════════════════════
+function totals(){
+  const rentT=rents.reduce((s,r)=>s+Number(r.amount),0);
+  const rentP=rents.filter(r=>r.paid).reduce((s,r)=>s+Number(r.amount),0);
+  const pasalT=pasals.reduce((s,p)=>s+Number(p.total),0);
+  const pasalP=pasals.reduce((s,p)=>s+Number(p.paid),0);
+  const overdue=rents.filter(r=>!r.paid&&r.dueDate&&new Date(r.dueDate)<new Date());
+  return{rentT,rentP,rentB:rentT-rentP,pasalT,pasalP,pasalB:pasalT-pasalP,overdue};
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg,type="ok"){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.style.background=type==="err"?"#dc2626":"#16a34a";
+  t.style.color="#fff";
+  t.style.display="block";
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.style.display="none";},2500);
+}
+
+// ═══════════════════════════════════════════════════════
+//  HEADER UPDATE
+// ═══════════════════════════════════════════════════════
+function updateHeader(){
+  const tbs=todayBS();
+  if(tbs){
+    document.getElementById("hdr-today").textContent=
+      `आज: ${nep(tbs.d)} ${BS_M_NP[tbs.m-1]} ${nep(tbs.y)}  •  ${new Date().toLocaleDateString("en-NP",{day:"numeric",month:"short",year:"numeric"})}`;
+  }
+  const {rentB,pasalB,overdue}=totals();
+  const total=rentB+pasalB;
+  const bEl=document.getElementById("hdr-baki");
+  bEl.textContent=fmtNPR(total);
+  bEl.style.color=total>0?"#fef08a":"#86efac";
+  document.getElementById("pill-rent").textContent=fmtNPR(rentB);
+  document.getElementById("pill-rent").style.color=rentB>0?"#fef08a":"#86efac";
+  document.getElementById("pill-pasal").textContent=fmtNPR(pasalB);
+  document.getElementById("pill-pasal").style.color=pasalB>0?"#fef08a":"#86efac";
+  document.getElementById("pill-overdue").textContent=`${overdue.length} rent`;
+  document.getElementById("pill-overdue").style.color=overdue.length>0?"#fef08a":"#86efac";
+}
+
+// ═══════════════════════════════════════════════════════
+//  TAB SYSTEM
+// ═══════════════════════════════════════════════════════
+let curTab="patro";
+function switchTab(t){
+  curTab=t;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tb-"+t).classList.add("active");
+  renderContent();
+}
+
+// ═══════════════════════════════════════════════════════
+//  MAIN CALENDAR STATE
+// ═══════════════════════════════════════════════════════
+const tbs=todayBS();
+let calY=tbs?.y||2082, calM=tbs?.m||1, selDay=null;
+
+function eventMap(){
+  const map={};
+  const mark=(ds,ev)=>{
+    if(!ds)return;
+    const bs=adToBS(new Date(ds));
+    if(!bs)return;
+    const k=`${bs.y}-${bs.m}-${bs.d}`;
+    if(!map[k])map[k]=[];
+    map[k].push(ev);
+  };
+  rents.forEach(r=>{
+    mark(r.dueDate, {type:"rent-due", label:`Rent Due: ${r.month}`, color:"#dc2626"});
+    mark(r.paidDate,{type:"rent-paid",label:`Rent Paid: ${r.month}`,color:"#16a34a"});
+  });
+  pasals.forEach(p=>mark(p.date,{type:"pasal",label:`${p.pasal}: ${fmtNPR(Number(p.total)-Number(p.paid))} baki`,color:Number(p.paid)>=Number(p.total)?"#16a34a":"#d97706"}));
+  return map;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER CONTENT
+// ═══════════════════════════════════════════════════════
+function renderContent(){
+  const c=document.getElementById("content");
+  if(curTab==="patro")     c.innerHTML=renderPatro();
+  else if(curTab==="summary") c.innerHTML=renderSummary();
+  else if(curTab==="rent")    c.innerHTML=renderRent();
+  else if(curTab==="pasal")   c.innerHTML=renderPasal();
+  updateHeader();
+}
+
+// ── PATRO ──────────────────────────────────────────────
+function renderPatro(){
+  const evMap=eventMap();
+  const mDays=bsDays(calY,calM);
+  const first=bsToAD(calY,calM,1).getDay();
+  const total=Math.ceil((first+mDays)/7)*7;
+  const tbs=todayBS();
+
+  // grid cells
+  let cells="";
+  for(let i=0;i<total;i++){
+    const dn=i-first+1;
+    const valid=dn>=1&&dn<=mDays;
+    if(!valid){cells+=`<div class="cal-day empty"></div>`;continue;}
+    const isTod=tbs&&calY===tbs.y&&calM===tbs.m&&dn===tbs.d;
+    const isSel=dn===selDay;
+    const dow=i%7;
+    const adDay=bsToAD(calY,calM,dn);
+    const evs=evMap[`${calY}-${calM}-${dn}`]||[];
+    const hasDue=evs.some(e=>e.type==="rent-due");
+    const hasPaid=evs.some(e=>e.type==="rent-paid");
+    const hasPasal=evs.some(e=>e.type==="pasal");
+    let cls="cal-day";
+    if(isTod)cls+=" today";
+    if(isSel)cls+=" selected";
+    if(dow===6)cls+=" sat";
+    if(dow===0)cls+=" sun";
+    let dots="";
+    if(hasDue||hasPaid||hasPasal){
+      dots=`<div class="dots">`;
+      if(hasDue)dots+=`<div class="dot" style="background:#dc2626"></div>`;
+      if(hasPaid)dots+=`<div class="dot" style="background:#16a34a"></div>`;
+      if(hasPasal)dots+=`<div class="dot" style="background:#d97706"></div>`;
+      dots+=`</div>`;
+    }
+    cells+=`<div class="${cls}" onclick="pickDay(${dn})">
+      <div class="cn">${nep(dn)}</div>
+      <div class="ca">${adDay.getDate()}</div>
+      ${dots}
+    </div>`;
+  }
+
+  // day headers
+  const dhCols=BS_W.map((d,i)=>`<div class="dh" style="color:${i===6?"#dc2626":i===0?"#b45309":"#6b7280"}">${d}</div>`).join("");
+
+  // selected day panel
+  let selPanel="";
+  if(selDay){
+    const evs=evMap[`${calY}-${calM}-${selDay}`]||[];
+    const adDate=bsToAD(calY,calM,selDay);
+    const evHtml=evs.length===0
+      ?`<div style="text-align:center;padding:8px 0;color:#9ca3af;font-size:12px">Yo din koun pani event chaina.</div>`
+      :evs.map(ev=>`<div class="event-row" style="background:${ev.color}15;border:1px solid ${ev.color}30">
+          <div class="event-dot" style="background:${ev.color}"></div>
+          <div style="font-size:12px;font-weight:600">${ev.label}</div>
+        </div>`).join("");
+    selPanel=`<div class="sel-day-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <div style="font-weight:800;font-size:15px;color:#d97706">${nep(selDay)} ${BS_M_NP[calM-1]} ${nep(calY)}</div>
+          <div style="font-size:11px;color:#9ca3af">${adDate.toLocaleDateString("en-NP",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
+        </div>
+        <button onclick="selDay=null;renderContent()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#9ca3af">✕</button>
+      </div>
+      ${evHtml}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="openModal('rent')" style="flex:1;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;color:#92400e">🏠 Add Rent</button>
+        <button onclick="openModal('pasal')" style="flex:1;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;color:#92400e">🛒 Add Pasal</button>
+      </div>
+    </div>`;
+  }
+
+  // month events list
+  const monthEvs=Object.entries(evMap).filter(([k])=>k.startsWith(`${calY}-${calM}-`))
+    .sort(([a],[b])=>parseInt(a.split("-")[2])-parseInt(b.split("-")[2]));
+  let evList="";
+  if(monthEvs.length>0){
+    evList=`<div style="font-weight:700;font-size:13px;margin-bottom:7px;color:#92400e">📋 Yo Mahina ka Events</div>`;
+    monthEvs.forEach(([k,evs])=>{
+      const d=parseInt(k.split("-")[2]);
+      const dow=BS_W[bsToAD(calY,calM,d).getDay()];
+      evs.forEach(ev=>{
+        evList+=`<div class="month-ev-item" style="border-left:3px solid ${ev.color};border:1px solid ${ev.color}30;border-left:3px solid ${ev.color}">
+          <div class="mei-day"><div class="mei-d" style="color:${ev.color}">${nep(d)}</div><div class="mei-w">${dow}</div></div>
+          <div style="flex:1;font-size:12px;font-weight:600">${ev.label}</div>
+        </div>`;
+      });
+    });
+  }
+
+  const todayJump=(calY!==tbs?.y||calM!==tbs?.m)?
+    `<div style="text-align:center;margin-top:6px"><button onclick="calY=${tbs?.y};calM=${tbs?.m};selDay=${tbs?.d};renderContent()" style="background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:20px;padding:3px 14px;font-size:10px;font-weight:700;cursor:pointer">↩ Aaja ko din</button></div>`:"";
+
+  return `
+    <div class="patro-header">
+      <div class="month-nav">
+        <button class="nav-btn" onclick="prevMonth()">‹</button>
+        <div>
+          <div class="month-title">${BS_M_NP[calM-1]} <span style="font-size:16px">${nep(calY)}</span></div>
+          <div class="month-sub">${BS_M_EN[calM-1]} ${calY}</div>
+        </div>
+        <button class="nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      ${todayJump}
+    </div>
+    <div class="day-headers">${dhCols}</div>
+    <div class="cal-grid">${cells}</div>
+    <div class="legend">
+      ${[["#dc2626","Rent Due"],["#16a34a","Rent Paid"],["#d97706","Pasal"],["#f59e0b","Aaja"]].map(([c,l])=>`<div class="legend-item"><div class="legend-dot" style="background:${c}"></div>${l}</div>`).join("")}
+    </div>
+    ${selPanel}
+    <div class="month-events">${evList}</div>
+    ${renderConverter()}
+  `;
+}
+
+function prevMonth(){if(calM===1){calY--;calM=12;}else calM--;selDay=null;renderContent();}
+function nextMonth(){if(calM===12){calY++;calM=1;}else calM++;selDay=null;renderContent();}
+function pickDay(d){selDay=(selDay===d)?null:d;renderContent();}
+
+// ── SUMMARY ────────────────────────────────────────────
+function renderSummary(){
+  const {rentT,rentP,rentB,pasalT,pasalP,pasalB,overdue}=totals();
+  const upR=rents.filter(r=>!r.paid);
+  const upP=pasals.filter(p=>Number(p.paid)<Number(p.total));
+  const total=rentB+pasalB;
+
+  let overdueHtml="";
+  if(overdue.length>0){
+    overdueHtml=`<div class="overdue-box anim">
+      <div class="overdue-title">⚠️ Overdue Rent (${overdue.length})</div>
+      ${overdue.map(r=>`<div class="overdue-row">
+        <div><div style="font-weight:700;font-size:13px">${r.month}</div><div style="font-size:10px;color:#9a3412">Due: ${fmtBS(r.dueDate)}</div></div>
+        <div style="text-align:right"><div style="font-weight:800;color:#dc2626">${fmtNPR(r.amount)}</div>
+          <button class="btn-out" onclick="markRentPaid(${r.id})">Tira!</button>
+        </div>
+      </div>`).join("")}
+    </div>`;
+  }
+  let pasalBakiHtml="";
+  if(upP.length>0){
+    pasalBakiHtml=`<div class="baki-box anim">
+      <div class="baki-title">🛒 Pasal Baki (${upP.length})</div>
+      ${upP.map(p=>`<div class="baki-row">
+        <div><div style="font-weight:700;font-size:13px">${p.pasal}</div><div style="font-size:10px;color:#92400e">${p.items.slice(0,26)}${p.items.length>26?"…":""}</div></div>
+        <div style="text-align:right"><div style="font-weight:800;color:#d97706">${fmtNPR(Number(p.total)-Number(p.paid))} <span style="font-size:9px;color:#9ca3af">baki</span></div>
+          <button class="btn-pay" onclick="openPayPasal(${p.id})">Tira</button>
+        </div>
+      </div>`).join("")}
+    </div>`;
+  }
+
+  return `
+    <div class="grid2">
+      ${[
+        {l:"Rent Tireko",v:fmtNPR(rentP),sub:`${rents.filter(r=>r.paid).length} mahina`,c:"#16a34a",bg:"#f0fdf4",b:"#bbf7d0",i:"✅"},
+        {l:"Rent Baki",v:fmtNPR(rentB),sub:`${upR.length} mahina`,c:"#dc2626",bg:"#fef2f2",b:"#fecaca",i:"⏳"},
+        {l:"Pasal Tireko",v:fmtNPR(pasalP),sub:`${pasals.length} records`,c:"#16a34a",bg:"#f0fdf4",b:"#bbf7d0",i:"✅"},
+        {l:"Pasal Baki",v:fmtNPR(pasalB),sub:`${upP.length} unpaid`,c:"#dc2626",bg:"#fef2f2",b:"#fecaca",i:"⏳"},
+      ].map(x=>`<div class="gcard anim" style="background:${x.bg};border:1px solid ${x.b}">
+        <div class="gi">${x.i}</div>
+        <div class="gl">${x.l}</div>
+        <div class="gv" style="color:${x.c}">${x.v}</div>
+        <div class="gs">${x.sub}</div>
+      </div>`).join("")}
+    </div>
+    <div class="big-baki anim">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="bb-l">JAMMA BAKI</div>
+          <div class="bb-v">${fmtNPR(total)}</div>
+          <div class="bb-s">Rent ${fmtNPR(rentB)} + Pasal ${fmtNPR(pasalB)}</div>
+        </div>
+        <div style="font-size:46px;opacity:.6">💸</div>
+      </div>
+    </div>
+    ${overdueHtml}
+    ${pasalBakiHtml}
+  `;
+}
+
+// ── RENT ───────────────────────────────────────────────
+function renderRent(){
+  const {rentT,rentP,rentB}=totals();
+  let cards=rents.length===0?`<div class="empty-state">Koun pani record chaina.</div>`:
+    rents.map(r=>{
+      const overdue=!r.paid&&r.dueDate&&new Date(r.dueDate)<new Date();
+      const borderColor=r.paid?"#16a34a":overdue?"#dc2626":"#f59e0b";
+      const paidHtml=r.paid?
+        `<div class="badge-paid">✓ Tireko</div><div class="rec-paid-label">BS: ${fmtBS(r.paidDate)}</div><div class="rec-ad">${fmtAD(r.paidDate)}</div>`:
+        `<button class="btn-tira" onclick="markRentPaid(${r.id})">Tira ✓</button>`;
+      return `<div class="rec-card anim" style="border-left:3px solid ${borderColor}">
+        <div class="rec-main">
+          <div class="rec-left">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:18px">${r.paid?"🟢":"🔴"}</span>
+              <div>
+                <div class="rec-title">${r.month}</div>
+                <div class="rec-bs">📅 Due: ${fmtBS(r.dueDate)}</div>
+                <div class="rec-ad">AD: ${fmtAD(r.dueDate)}</div>
+              </div>
+            </div>
+            ${r.note?`<div class="rec-note">${r.note}</div>`:""}
+          </div>
+          <div class="rec-right">
+            <div class="rec-amount" style="color:${r.paid?"#16a34a":"#dc2626"}">${fmtNPR(r.amount)}</div>
+            <div style="margin-top:3px">${paidHtml}</div>
+            <button class="btn-del" style="border:none;background:none;color:#ef4444;font-size:10px;cursor:pointer;margin-top:4px" onclick="confirmDel('rent',${r.id})">🗑 Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+  return `
+    <div class="sec-header">
+      <div><div class="sec-title">🏠 Kotha Bhadaa</div><div class="sec-sub">Room Rent Records</div></div>
+      <button class="btn-add" onclick="openModal('rent')">+ Thap</button>
+    </div>
+    <div class="stat-row">
+      ${[{l:"Jamma",v:fmtNPR(rentT),c:"#1c1a17"},{l:"Tireko",v:fmtNPR(rentP),c:"#16a34a"},{l:"Baki",v:fmtNPR(rentB),c:"#dc2626"}].map(x=>`<div class="stat-cell"><div class="sl">${x.l}</div><div class="sv" style="color:${x.c}">${x.v}</div></div>`).join("")}
+    </div>
+    ${cards}
+  `;
+}
+
+// ── PASAL ──────────────────────────────────────────────
+function renderPasal(){
+  const {pasalT,pasalP,pasalB}=totals();
+  let cards=pasals.length===0?`<div class="empty-state">Koun pani record chaina.</div>`:
+    pasals.map(p=>{
+      const baki=Number(p.total)-Number(p.paid);
+      const pct=Math.round((Number(p.paid)/Number(p.total))*100)||0;
+      const borderColor=baki===0?"#16a34a":"#d97706";
+      return `<div class="rec-card anim" style="border-left:3px solid ${borderColor}">
+        <div class="rec-main" style="margin-bottom:7px">
+          <div class="rec-left">
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:18px">${baki===0?"🟢":"🟡"}</span>
+              <div>
+                <div class="rec-title">${p.pasal}</div>
+                <div class="rec-bs">📅 ${fmtBS(p.date)}</div>
+                <div class="rec-ad">${fmtAD(p.date)}</div>
+              </div>
+            </div>
+            <div class="saman-box"><span style="color:#9ca3af;font-size:9px;font-weight:700">SAMAN: </span>${p.items}</div>
+            ${p.note?`<div class="rec-note" style="font-style:italic">${p.note}</div>`:""}
+          </div>
+          <div class="rec-right">
+            <div style="font-size:16px;font-weight:900">${fmtNPR(p.total)}</div>
+            <div style="font-size:10px;color:#16a34a;font-weight:700">Tireko: ${fmtNPR(p.paid)}</div>
+            <div style="font-size:11px;font-weight:800;color:${baki>0?"#dc2626":"#16a34a"}">Baki: ${fmtNPR(baki)}</div>
+          </div>
+        </div>
+        <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${pct===100?"#16a34a":"linear-gradient(90deg,#d97706,#f59e0b)"}"></div></div>
+        <div class="rec-footer">
+          <span style="font-size:10px;color:#6b7280">${pct}% tiriyeko</span>
+          <div style="display:flex;gap:6px">
+            ${baki>0?`<button class="btn-pay" onclick="openPayPasal(${p.id})">💸 Tira</button>`:""}
+            <button class="btn-del" onclick="confirmDel('pasal',${p.id})">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+
+  return `
+    <div class="sec-header">
+      <div><div class="sec-title">🛒 Pasal Khata</div><div class="sec-sub">Shop Purchase Records</div></div>
+      <button class="btn-add" onclick="openModal('pasal')">+ Thap</button>
+    </div>
+    <div class="stat-row">
+      ${[{l:"Jamma",v:fmtNPR(pasalT),c:"#1c1a17"},{l:"Tireko",v:fmtNPR(pasalP),c:"#16a34a"},{l:"Baki",v:fmtNPR(pasalB),c:"#dc2626"}].map(x=>`<div class="stat-cell"><div class="sl">${x.l}</div><div class="sv" style="color:${x.c}">${x.v}</div></div>`).join("")}
+    </div>
+    ${cards}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+//  BS DATE PICKER CLASS
+// ═══════════════════════════════════════════════════════
+class BSPicker{
+  constructor({id,label,value,accent,optional}){
+    this.id=id; this.label=label; this.value=value||""; this.accent=accent||"#d97706"; this.optional=optional||false;
+    const tbs=todayBS();
+    const init=value?adToBS(new Date(value)):null;
+    this.calY=init?.y||tbs?.y||2082;
+    this.calM=init?.m||tbs?.m||1;
+    this.open=false;
+  }
+  setVal(v){this.value=v;if(v){const bs=adToBS(new Date(v));if(bs){this.calY=bs.y;this.calM=bs.m;}}this.render();}
+  prevM(){if(this.calM===1){this.calY--;this.calM=12;}else this.calM--;this.render();}
+  nextM(){if(this.calM===12){this.calY++;this.calM=1;}else this.calM++;this.render();}
+  toggleOpen(){this.open=!this.open;this.render();if(this.open){window._activePicker=this;}}
+  pickDay(d){this.value=bsToADStr(this.calY,this.calM,d);this.open=false;this.render();}
+  clear(){this.value="";this.render();}
+  getHTML(){
+    const selBS=this.value?adToBS(new Date(this.value)):null;
+    const displayMain=selBS?`${nep(selBS.d)} ${BS_M_NP[selBS.m-1]} ${nep(selBS.y)}`:"मिति छान्नुहोस्…";
+    const displayAD=this.value?`AD: ${fmtAD(this.value)}`:"";
+    const tbs=todayBS();
+
+    // calendar grid
+    let calHtml="";
+    if(this.open){
+      const mDays=bsDays(this.calY,this.calM);
+      const first=bsToAD(this.calY,this.calM,1).getDay();
+      const total=Math.ceil((first+mDays)/7)*7;
+      let cells="";
+      for(let i=0;i<total;i++){
+        const dn=i-first+1; const valid=dn>=1&&dn<=mDays;
+        if(!valid){cells+=`<div class="bsdp-cell empty"></div>`;continue;}
+        const isTod=tbs&&this.calY===tbs.y&&this.calM===tbs.m&&dn===tbs.d;
+        const isSel=selBS&&this.calY===selBS.y&&this.calM===selBS.m&&dn===selBS.d;
+        const dow=i%7;
+        let cls="bsdp-cell";
+        if(isTod)cls+=" tod";
+        if(isSel)cls+=" sel";
+        if(dow===6)cls+=" sat";
+        if(dow===0)cls+=" sun";
+        let st="";
+        if(isSel)st=`background:${this.accent};color:#fff;`;
+        else if(isTod)st=`background:${this.accent}20;color:${this.accent};border-color:${this.accent};`;
+        // month/year dropdowns
+        const mOpts=BS_M_NP.map((m,i)=>`<option value="${i+1}"${this.calM===i+1?" selected":""}>${m}</option>`).join("");
+        const yOpts=Array.from({length:91},(_,i)=>2000+i).map(y=>`<option value="${y}"${this.calY===y?" selected":""}>${nep(y)}</option>`).join("");
+        cells+=`<div class="${cls}" style="${st}" onclick="pickers['${this.id}'].pickDay(${dn})">${nep(dn)}</div>`;
+        // reset for next iteration
+        if(i===0){
+          // generate the header once - we do it outside the loop below
+        }
+      }
+      const mOpts=BS_M_NP.map((m,i)=>`<option value="${i+1}"${this.calM===i+1?" selected":""}>${m}</option>`).join("");
+      const yOpts=Array.from({length:91},(_,i)=>2000+i).map(y=>`<option value="${y}"${this.calY===y?" selected":""}>${nep(y)}</option>`).join("");
+      const dhHtml=BS_W.map((d,i)=>`<div class="bsdp-dhc" style="color:${i===6?"#dc2626":i===0?"#b45309":"#9ca3af"}">${d}</div>`).join("");
+      const todBtn=`<button class="bsdp-today-btn" style="color:${this.accent}" onclick="pickers['${this.id}'].goToday()">↩ Aaja: ${tbs?`${nep(tbs.d)} ${BS_M_NP[tbs.m-1]} ${nep(tbs.y)}`:""}</button>`;
+      calHtml=`<div class="bsdp-cal" style="--accent:${this.accent}">
+        <div class="bsdp-nav">
+          <button class="bsdp-nav-btn" style="color:${this.accent}" onclick="pickers['${this.id}'].prevM()">‹</button>
+          <div>
+            <select onchange="pickers['${this.id}'].calM=parseInt(this.value);pickers['${this.id}'].render()">${mOpts}</select>
+            <select style="color:${this.accent}" onchange="pickers['${this.id}'].calY=parseInt(this.value);pickers['${this.id}'].render()">${yOpts}</select>
+          </div>
+          <button class="bsdp-nav-btn" style="color:${this.accent}" onclick="pickers['${this.id}'].nextM()">›</button>
+        </div>
+        ${todBtn}
+        <div class="bsdp-dh">${dhHtml}</div>
+        <div class="bsdp-grid">${cells}</div>
+      </div>`;
+    }
+
+    const clearBtn=this.value&&this.optional?`<button class="dt-clear" onclick="event.stopPropagation();pickers['${this.id}'].clear()">✕</button>`:"";
+    const optLabel=this.optional?` <span style="color:#9ca3af;font-weight:400">(optional)</span>`:"";
+
+    return `<div class="bsdp" id="bsdp-wrap-${this.id}">
+      <label>${this.label}${optLabel}</label>
+      <div class="bsdp-trigger${this.open?" open":""}" onclick="pickers['${this.id}'].toggleOpen()">
+        <div style="display:flex;align-items:center;gap:0">
+          <span class="dt-icon">📅</span>
+          <div>
+            <div class="dt-main${selBS?"":" empty"}">${displayMain}</div>
+            ${displayAD?`<div class="dt-sub">${displayAD}</div>`:""}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+          ${clearBtn}
+          <span class="dt-arrow" style="color:${this.accent}">${this.open?"▲":"▼"}</span>
+        </div>
+      </div>
+      ${calHtml}
+    </div>`;
+  }
+  render(){
+    const wrap=document.getElementById("bsdp-wrap-"+this.id);
+    if(wrap){wrap.outerHTML=this.getHTML();}
+  }
+  goToday(){const tbs=todayBS();if(tbs){this.calY=tbs.y;this.calM=tbs.m;}this.render();}
+}
+
+window.pickers={};
+
+function makePicker(cfg){
+  const p=new BSPicker(cfg);
+  window.pickers[cfg.id]=p;
+  return p.getHTML();
+}
+
+// close pickers on outside click
+document.addEventListener("click",e=>{
+  Object.values(window.pickers).forEach(p=>{
+    if(p.open){
+      const wrap=document.getElementById("bsdp-wrap-"+p.id);
+      if(wrap&&!wrap.contains(e.target)){p.open=false;p.render();}
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  MODAL SYSTEM
+// ═══════════════════════════════════════════════════════
+let curModal=null;
+function openModal(type){
+  curModal=type;
+  window.pickers={};
+  document.getElementById("modal").style.display="flex";
+  const box=document.getElementById("modal-box");
+  if(type==="rent")    box.innerHTML=buildRentForm();
+  else if(type==="pasal") box.innerHTML=buildPasalForm();
+}
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+  curModal=null;
+  window.pickers={};
+}
+
+function buildRentForm(){
+  const duePicker  =makePicker({id:"r-due",  label:"Due Date (BS मिति)",        value:"",    accent:"#dc2626"});
+  const paidPicker =makePicker({id:"r-paid", label:"Paid Date (tireko din)",    value:"",    accent:"#16a34a",optional:true});
+  return `
+    <div class="modal-header">🏠 Naya Rent Thap<button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-field"><label>Mahina (e.g. Baisakh 2082)</label><input class="form-input" id="r-month" placeholder="Chaitra 2081"></div>
+    <div class="form-field"><label>Rakkam (Rs)</label><input class="form-input" id="r-amt" type="number" placeholder="7000"></div>
+    ${duePicker}
+    ${paidPicker}
+    <div class="form-field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="r-paid-cb" style="width:16px;height:16px;accent-color:#d97706"> Tiriyeko cha (Paid)</label></div>
+    <div class="form-field"><label>Note (optional)</label><input class="form-input" id="r-note" placeholder="optional..."></div>
+    <button class="btn-primary" onclick="submitRent()">✓ Record Thap</button>
+  `;
+}
+
+function buildPasalForm(){
+  const datePicker=makePicker({id:"p-date",label:"Kharida Date (BS मिति)",value:todayStr(),accent:"#d97706"});
+  return `
+    <div class="modal-header">🛒 Pasal Record Thap<button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="form-field"><label>Pasal ko Naam</label><input class="form-input" id="p-pasal" placeholder="Sharma Pasal"></div>
+    <div class="form-field"><label>Liyeko Saman</label><input class="form-input" id="p-items" placeholder="Chamal 5kg, Daal 1kg, Tel..."></div>
+    <div class="form-field"><label>Jamma Rakkam (Rs)</label><input class="form-input" id="p-total" type="number" placeholder="1500"></div>
+    <div class="form-field"><label>Tireko Paisa (Rs)</label><input class="form-input" id="p-paid" type="number" placeholder="0"></div>
+    ${datePicker}
+    <div class="form-field"><label>Note (optional)</label><input class="form-input" id="p-note" placeholder="optional..."></div>
+    <button class="btn-primary" onclick="submitPasal()">✓ Record Thap</button>
+  `;
+}
+
+function submitRent(){
+  const month=document.getElementById("r-month")?.value.trim();
+  const amt  =document.getElementById("r-amt")?.value;
+  const due  =window.pickers["r-due"]?.value||"";
+  const paid =window.pickers["r-paid"]?.value||"";
+  const paidCb=document.getElementById("r-paid-cb")?.checked||false;
+  const note =document.getElementById("r-note")?.value.trim()||"";
+  if(!month||!amt||!due){showToast("Sabai field bharnu hos","err");return;}
+  rents.unshift({id:Date.now(),month,amount:Number(amt),dueDate:due,paidDate:paid,paid:paidCb,note});
+  saveData();closeModal();showToast("Rent record thapiyो ✓");renderContent();
+}
+
+function submitPasal(){
+  const pasal=document.getElementById("p-pasal")?.value.trim();
+  const items=document.getElementById("p-items")?.value.trim();
+  const total=document.getElementById("p-total")?.value;
+  const paid =document.getElementById("p-paid")?.value||"0";
+  const date =window.pickers["p-date"]?.value||todayStr();
+  const note =document.getElementById("p-note")?.value.trim()||"";
+  if(!pasal||!items||!total){showToast("Sabai field bharnu hos","err");return;}
+  pasals.unshift({id:Date.now(),pasal,items,total:Number(total),paid:Number(paid),date,note});
+  saveData();closeModal();showToast("Pasal record thapiyो ✓");renderContent();
+}
+
+// ── PAY PASAL ──────────────────────────────────────────
+function openPayPasal(id){
+  const p=pasals.find(x=>x.id===id);if(!p)return;
+  const baki=Number(p.total)-Number(p.paid);
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("modal-box").innerHTML=`
+    <div class="modal-header">💸 Paisa Tira<button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="pay-info">
+      <div style="font-weight:700">${p.pasal}</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:1px">${p.items}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px">
+        <div><div style="font-size:8px;color:#9ca3af">Jamma</div><div style="font-weight:700">${fmtNPR(p.total)}</div></div>
+        <div><div style="font-size:8px;color:#9ca3af">Tireko</div><div style="font-weight:700;color:#16a34a">${fmtNPR(p.paid)}</div></div>
+        <div><div style="font-size:8px;color:#9ca3af">Baki</div><div style="font-weight:700;color:#dc2626">${fmtNPR(baki)}</div></div>
+      </div>
+    </div>
+    <div class="form-field"><label>Tirne Rakkam – Baki: ${fmtNPR(baki)}</label>
+      <input class="form-input" id="pay-amt" type="number" placeholder="Max ${baki}" style="font-size:16px">
+    </div>
+    <div class="pay-btns">
+      ${[500,1000,baki].map(v=>`<button class="btn-small" style="flex:1" onclick="document.getElementById('pay-amt').value=${v}">${fmtNPR(v)}</button>`).join("")}
+    </div>
+    <button class="btn-green" onclick="submitPay(${id},${baki})">✓ Tira Confirm</button>
+  `;
+}
+
+function submitPay(id,baki){
+  const amt=Number(document.getElementById("pay-amt")?.value||0);
+  if(!amt||amt<=0){showToast("Rakam halnu hos","err");return;}
+  pasals=pasals.map(x=>x.id!==id?x:{...x,paid:Math.min(Number(x.paid)+amt,Number(x.total))});
+  saveData();closeModal();showToast("Paisa tiriyो ✓");renderContent();
+}
+
+function markRentPaid(id){
+  rents=rents.map(r=>r.id!==id?r:{...r,paid:true,paidDate:todayStr()});
+  saveData();showToast("Rent tiriyo ✓");renderContent();
+}
+
+// ── DELETE ─────────────────────────────────────────────
+function confirmDel(type,id){
+  document.getElementById("del-overlay").style.display="flex";
+  document.getElementById("del-confirm-btn").onclick=()=>{
+    if(type==="rent")  rents=rents.filter(r=>r.id!==id);
+    else pasals=pasals.filter(p=>p.id!==id);
+    saveData();closeDel();showToast("Deleted","err");renderContent();
+  };
+}
+function closeDel(){document.getElementById("del-overlay").style.display="none";}
+
+// ═══════════════════════════════════════════════════════
+//  BS↔AD CONVERTER
+// ═══════════════════════════════════════════════════════
+let convMode="ad2bs";
+function renderConverter(){
+  const mOpts=BS_M_EN.map((m,i)=>`<option value="${i+1}">${m}</option>`).join("");
+  return `<div class="converter">
+    <div style="font-weight:700;font-size:13px;margin-bottom:11px;color:#92400e">🔄 BS ↔ AD Converter</div>
+    <div class="conv-toggle">
+      <button class="conv-btn" id="cb-ad2bs" style="background:${convMode==="ad2bs"?"#d97706":"#fef3c7"};color:${convMode==="ad2bs"?"#fff":"#92400e"}" onclick="convMode='ad2bs';renderContent()">AD → BS</button>
+      <button class="conv-btn" id="cb-bs2ad" style="background:${convMode==="bs2ad"?"#d97706":"#fef3c7"};color:${convMode==="bs2ad"?"#fff":"#92400e"}" onclick="convMode='bs2ad';renderContent()">BS → AD</button>
+    </div>
+    ${convMode==="ad2bs"?
+      `<div class="form-field"><input class="form-input" type="date" id="conv-ad" onchange="doConvert()"></div>`:
+      `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px">
+        <div><label style="font-size:9px;color:#9ca3af;font-weight:700;display:block;margin-bottom:3px">YEAR</label><input class="form-input" id="conv-y" type="number" placeholder="2082" style="padding:9px 7px;font-size:12px"></div>
+        <div><label style="font-size:9px;color:#9ca3af;font-weight:700;display:block;margin-bottom:3px">MONTH</label><select class="form-input" id="conv-m" style="padding:9px 5px;font-size:11px">${mOpts}</select></div>
+        <div><label style="font-size:9px;color:#9ca3af;font-weight:700;display:block;margin-bottom:3px">DAY</label><input class="form-input" id="conv-d" type="number" placeholder="1" min="1" max="32" style="padding:9px 7px;font-size:12px"></div>
+      </div>`
+    }
+    <button onclick="doConvert()" style="width:100%;background:linear-gradient(135deg,#92400e,#d97706);color:#fff;border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:8px">Convert Gara</button>
+    <div id="conv-result"></div>
+  </div>`;
+}
+
+function doConvert(){
+  const res=document.getElementById("conv-result");if(!res)return;
+  if(convMode==="ad2bs"){
+    const v=document.getElementById("conv-ad")?.value;
+    if(!v){res.innerHTML="";return;}
+    const bs=adToBS(new Date(v));
+    res.innerHTML=bs?`<div class="conv-result" style="background:#fef9ec;border:1px solid #fde68a;color:#92400e">📅 ${nep(bs.d)} ${BS_M_NP[bs.m-1]} ${nep(bs.y)} &nbsp; (${BS_M_EN[bs.m-1]} ${bs.d}, ${bs.y} BS)</div>`
+      :`<div class="conv-result" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626">Convert garna sakiyena.</div>`;
+  }else{
+    const y=parseInt(document.getElementById("conv-y")?.value);
+    const m=parseInt(document.getElementById("conv-m")?.value);
+    const d=parseInt(document.getElementById("conv-d")?.value);
+    if(!y||!m||!d){res.innerHTML="";return;}
+    const ad=bsToAD(y,m,d);
+    res.innerHTML=`<div class="conv-result" style="background:#fef9ec;border:1px solid #fde68a;color:#92400e">📅 ${ad.toLocaleDateString("en-NP",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+renderContent();
+</script>
+</body>
+</html>
